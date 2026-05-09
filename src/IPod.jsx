@@ -571,20 +571,28 @@ function VolumeOverlay({ volume }) {
 // ─── ROOT COMPONENT ────────────────────────────────────────────────
 const LIST_SCREENS = ["mainMenu","musicMenu","gamesMenu","extrasMenu","albums","songs","albumTracks"];
 
-const audioCtx = typeof window !== 'undefined' ? new (window.AudioContext || window.webkitAudioContext)() : null;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
 
 function playTick() {
-  if (!audioCtx) return;
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
   osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.025);
-  osc.start(audioCtx.currentTime);
-  osc.stop(audioCtx.currentTime + 0.025);
+  gain.connect(ctx.destination);
+  osc.frequency.setValueAtTime(1200, ctx.currentTime);
+  gain.gain.setValueAtTime(0.08, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.025);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.025);
   if (navigator.vibrate) navigator.vibrate(1);
 }
 
