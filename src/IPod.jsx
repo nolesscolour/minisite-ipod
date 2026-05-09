@@ -574,7 +574,13 @@ const LIST_SCREENS = ["mainMenu","musicMenu","gamesMenu","extrasMenu","albums","
 let audioCtx = null;
 
 function getAudioCtx() {
-  if (!audioCtx) return null;
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {
+      return null;
+    }
+  }
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
