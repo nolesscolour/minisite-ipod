@@ -579,6 +579,22 @@ function getAudioCtx() {
   return audioCtx;
 }
 
+function playClick() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(180, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.06);
+  gain.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.08);
+}
+
 function playTick() {
   const ctx = getAudioCtx();
   if (!ctx) return;
@@ -638,7 +654,7 @@ export default function IPod() {
   }, [isPlaying, currentTrack]);
 
   const push = (s) => { setNavStack((prev) => [...prev, s]); setSelectedIndex(0); };
-  const pop  = () => { if (navStack.length > 1) { setNavStack((prev) => prev.slice(0, -1)); setSelectedIndex(0); } };
+  const pop  = () => { if (navStack.length > 1) { playClick(); setNavStack((prev) => prev.slice(0, -1)); setSelectedIndex(0); } };
 
   const getItems = () => {
     if (screen.id === "mainMenu")    return MAIN_MENU;
@@ -686,6 +702,7 @@ export default function IPod() {
   };
 
   const handleSelect = () => {
+    playClick();
     const items = getItems();
     const item = items[selectedIndex];
     if (!item) return;
@@ -723,18 +740,21 @@ export default function IPod() {
   };
 
   const handlePrev = () => {
+    playClick();
     if (!currentTrack) return;
     const idx = ALL_TRACKS.findIndex((t) => t.id === currentTrack.id);
     if (idx > 0) { setCurrentTrack(ALL_TRACKS[idx - 1]); setProgress(0); }
   };
 
   const handleNext = () => {
+    playClick();
     if (!currentTrack) return;
     const idx = ALL_TRACKS.findIndex((t) => t.id === currentTrack.id);
     if (idx < ALL_TRACKS.length - 1) { setCurrentTrack(ALL_TRACKS[idx + 1]); setProgress(0); }
   };
 
   const handlePlayPause = () => {
+    playClick();
     if (!currentTrack) { playTrack(ALL_TRACKS[0]); return; }
     setIsPlaying((p) => !p);
   };
