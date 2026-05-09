@@ -573,21 +573,6 @@ const LIST_SCREENS = ["mainMenu","musicMenu","gamesMenu","extrasMenu","albums","
 
 let audioCtx = null;
 
-function unlockAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const buf = audioCtx.createBuffer(1, 1, 22050);
-  const src = audioCtx.createBufferSource();
-  src.buffer = buf;
-  src.connect(audioCtx.destination);
-  src.start(0);
-  document.removeEventListener('touchstart', unlockAudio);
-  document.removeEventListener('mousedown', unlockAudio);
-}
-
-document.addEventListener('touchstart', unlockAudio, { once: true });
-document.addEventListener('mousedown', unlockAudio, { once: true });
-
 function getAudioCtx() {
   if (!audioCtx) return null;
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -619,6 +604,24 @@ export default function IPod() {
   const [showVol, setShowVol] = useState(false);
   const [rotateSignal, setRotateSignal] = useState(0);
   const volTimer = useRef(null);
+
+  useEffect(() => {
+    const unlock = () => {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const buf = audioCtx.createBuffer(1, 1, 22050);
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+    };
+    document.addEventListener('touchstart', unlock, { once: true });
+    document.addEventListener('mousedown', unlock, { once: true });
+    return () => {
+      document.removeEventListener('touchstart', unlock);
+      document.removeEventListener('mousedown', unlock);
+    };
+  }, []);
 
   const screen = navStack[navStack.length - 1];
   const isRoot = navStack.length === 1;
