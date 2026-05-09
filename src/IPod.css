@@ -9,28 +9,28 @@
   box-sizing: border-box;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .ipod-outer {
-    padding: 24px 16px;
+    padding: 16px 12px;
   }
 
   .ipod-body {
-    width: 248px;
+    width: 290px;
   }
 
   .wheel {
-    width: 186px;
-    height: 186px;
+    width: 218px;
+    height: 218px;
   }
 
   .wheel-center-btn {
-    width: 54px;
-    height: 54px;
+    width: 64px;
+    height: 64px;
   }
 }
 
 .ipod-body {
-  width: 272px;
+  width: 320px;
   background: linear-gradient(168deg, #f6f6f6 0%, #e2e2e2 35%, #d2d2d2 65%, #cacaca 100%);
   border-radius: 26px;
   padding: 14px 14px 0;
@@ -53,7 +53,7 @@
 
 .screen {
   width: 100%;
-  height: 198px;
+  height: 220px;
   background: #fff;
   border-radius: 3px;
   overflow: hidden;
@@ -391,10 +391,10 @@
 .cf-reflect {
   height: 28px;
   overflow: hidden;
-  opacity: 0.22;
+  opacity: 0.35;
   transform: scaleY(-1);
-  -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,0.5) 100%);
-  mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,0.5) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%);
 }
 
 .cf-reflect img {
@@ -512,8 +512,8 @@
 
 /* ── Click Wheel ── */
 .wheel {
-  width: 204px;
-  height: 204px;
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
   margin: 0 auto;
   background: radial-gradient(circle at 38% 32%, #ffffff 0%, #ebebeb 32%, #d8d8d8 62%, #c6c6c6 100%);
@@ -556,8 +556,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, #eaeaea 0%, #d6d6d6 50%, #bebebe 100%);
   box-shadow:

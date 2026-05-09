@@ -531,9 +531,19 @@ function ClickWheel({ onRotate, onMenu, onSelect, onPrev, onNext, onPlayPause })
       onTouchEnd={onUp}
     >
       <span className="wl wl-menu">MENU</span>
-      <span className="wl wl-prev">◀◀</span>
-      <span className="wl wl-next">▶▶</span>
-      <span className="wl wl-play">▶II</span>
+      <svg className="wl wl-prev" width="14" height="10" viewBox="0 0 14 10">
+        <polygon points="6,0 0,5 6,10" fill="#6e6e6e"/>
+        <polygon points="13,0 7,5 13,10" fill="#6e6e6e"/>
+      </svg>
+      <svg className="wl wl-next" width="14" height="10" viewBox="0 0 14 10">
+        <polygon points="0,0 6,5 0,10" fill="#6e6e6e"/>
+        <polygon points="7,0 13,5 7,10" fill="#6e6e6e"/>
+      </svg>
+      <svg className="wl wl-play" width="14" height="10" viewBox="0 0 14 10">
+        <polygon points="0,0 6,5 0,10" fill="#6e6e6e"/>
+        <rect x="8" y="0" width="2.5" height="10" fill="#6e6e6e"/>
+        <rect x="11.5" y="0" width="2.5" height="10" fill="#6e6e6e"/>
+      </svg>
       <div className="wheel-center-btn" />
     </div>
   );
@@ -565,6 +575,7 @@ const audioCtx = typeof window !== 'undefined' ? new (window.AudioContext || win
 
 function playTick() {
   if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.connect(gain);
