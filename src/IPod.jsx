@@ -655,6 +655,14 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
     prevPhotoCount.current = photos.length;
   }, [photos.length]);
 
+  useEffect(() => {
+    if (!gridRef.current || viewing !== null) return;
+    const cells = gridRef.current.children;
+    if (cells[selected]) {
+      cells[selected].scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [selected]);
+
   const placeholders = [
     "https://picsum.photos/seed/ash1/160/160",
     "https://picsum.photos/seed/ash2/160/160",

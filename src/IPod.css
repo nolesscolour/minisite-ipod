@@ -497,8 +497,8 @@
   background: #ddd;
   align-content: start;
   scrollbar-width: none;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
+  touch-action: none;
+  -webkit-overflow-scrolling: auto;
 }
 
 .photo-thumb {
