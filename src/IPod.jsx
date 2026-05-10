@@ -643,6 +643,12 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
   const prevPhotoCount = useRef(photos.length);
 
   useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.scrollTop = gridRef.current.scrollHeight;
+    }
+  }, []);
+
+  useEffect(() => {
     if (photos.length > prevPhotoCount.current && gridRef.current) {
       gridRef.current.scrollTop = gridRef.current.scrollHeight;
     }
