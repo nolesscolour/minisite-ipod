@@ -639,6 +639,15 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
   const allRef = useRef([]);
   const prevSelect = useRef(selectSignal);
   const prevBack = useRef(backSignal);
+  const gridRef = useRef(null);
+  const prevPhotoCount = useRef(photos.length);
+
+  useEffect(() => {
+    if (photos.length > prevPhotoCount.current && gridRef.current) {
+      gridRef.current.scrollTop = gridRef.current.scrollHeight;
+    }
+    prevPhotoCount.current = photos.length;
+  }, [photos.length]);
 
   const placeholders = [
     "https://picsum.photos/seed/ash1/160/160",
@@ -694,7 +703,7 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
   return (
     <div className="screen-inner">
       <Header title="Photos" onBack={onBack} />
-      <div className="photos-grid">
+      <div className="photos-grid" ref={gridRef}>
         {all.map((src, i) => (
           <div
             key={i}
@@ -1245,7 +1254,7 @@ export default function IPod() {
     if (screen.id==="musicRecs")    return <MusicRecommendationsScreen onBack={pop} scrollSignal={noteScrollSignal} />;
     if (screen.id==="links")        return <LinksScreen onBack={pop} />;
     if (screen.id==="photos")     return <PhotosScreen onBack={pop} photos={cameraRoll} photoSignal={photoSignal} selectSignal={photoSelectSignal} backSignal={photoBackSignal} />;
-    if (screen.id==="camera")     return <CameraScreen onBack={pop} onCapture={url=>setCameraRoll(prev=>[url,...prev])} captureSignal={cameraCaptureSignal} switchSignal={cameraSwitchSignal} />;
+    if (screen.id==="camera")     return <CameraScreen onBack={pop} onCapture={url=>setCameraRoll(prev=>[...prev,url])} captureSignal={cameraCaptureSignal} switchSignal={cameraSwitchSignal} />;
     if (screen.id==="clock")      return <ClockScreen onBack={pop} />;
     if (screen.id==="snake")      return <SnakeGame onBack={pop} rotateSignal={rotateSignal} />;
     if (screen.id==="ball")       return <BallGame onBack={pop} rotateSignal={rotateSignal} />;
