@@ -711,17 +711,18 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
 // ─── CAMERA ────────────────────────────────────────────────────────
 function playShutter() {
   const ctx = getAudioCtx(); if (!ctx) return;
-  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.18, ctx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < data.length; i++) {
     const t = i / ctx.sampleRate;
-    data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 40) * 0.6;
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 18) * 0.35;
   }
   const src = ctx.createBufferSource();
   const gain = ctx.createGain();
   src.buffer = buf;
   src.connect(gain); gain.connect(ctx.destination);
-  gain.gain.setValueAtTime(1, ctx.currentTime);
+  gain.gain.setValueAtTime(0.7, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
   src.start(ctx.currentTime);
 }
 
@@ -780,7 +781,8 @@ function CameraScreen({ onBack, onCapture, captureSignal, switchSignal }) {
 
   const startCamera = (mode) => {
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: mode }, audio: false })
+    const constraints = { video: { facingMode: { ideal: mode } }, audio: false };
+    navigator.mediaDevices.getUserMedia(constraints)
       .then(stream => {
         streamRef.current = stream;
         if (videoRef.current) { videoRef.current.srcObject = stream; setHasPermission(true); }
@@ -968,6 +970,8 @@ function ClickWheel({ onRotate, onMenu, onSelect, onPrev, onNext, onPlayPause })
     const r = ref.current.getBoundingClientRect();
     return { cx:r.left+r.width/2, cy:r.top+r.height/2, wr:r.width/2 };
   };
+  const lastTouchEnd = useRef(0);
+
   const onDown = (e) => {
     e.preventDefault();
     const pt=xy(e); const c=center();
@@ -990,6 +994,9 @@ function ClickWheel({ onRotate, onMenu, onSelect, onPrev, onNext, onPlayPause })
   const onUp = (e) => {
     if (!down.current) return;
     const moved=down.current.moved; down.current=null; if (moved) return;
+    const now = Date.now();
+    if (now - lastTouchEnd.current < 400) return;
+    lastTouchEnd.current = now;
     const pt=xy(e); const c=center();
     const dist=Math.hypot(pt.x-c.cx,pt.y-c.cy);
     if (dist<c.wr*0.3) { onSelect(); return; }

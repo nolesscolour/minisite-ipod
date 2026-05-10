@@ -492,10 +492,12 @@
   gap: 2px;
   padding: 2px;
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
   background: #ddd;
   align-content: start;
   scrollbar-width: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 .photos-grid::-webkit-scrollbar { display: none; }
 
