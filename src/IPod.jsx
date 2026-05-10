@@ -63,24 +63,54 @@ const ALL_TRACKS = ALBUMS.flatMap((album) =>
 );
 
 const MAIN_MENU = [
+  { id: "nowPlaying", label: "Now Playing", hasArrow: false },
   { id: "music",      label: "Music",       hasArrow: true  },
   { id: "photos",     label: "Photos",      hasArrow: true  },
   { id: "camera",     label: "Camera",      hasArrow: false },
   { id: "games",      label: "Games",       hasArrow: true  },
   { id: "clock",      label: "Clock",       hasArrow: false },
+  { id: "notes",      label: "Notes",       hasArrow: true  },
+  { id: "links",      label: "Links",       hasArrow: false, hasLock: true },
   { id: "about",      label: "About",       hasArrow: false },
-  { id: "nowPlaying", label: "Now Playing", hasArrow: false },
+];
+
+const NOTES_MENU = [
+  { id: "experiences",        label: "Experiences",          hasArrow: false },
+  { id: "blogs",              label: "Blogs",                hasArrow: true  },
+  { id: "musicRecommendations", label: "Music Recommendations", hasArrow: false },
+];
+
+// ─── EDIT: BLOGS LIST ─────────────────────────────────────────────
+// Add or edit blog entries here. Each needs: id, title, year, content.
+const BLOGS_DATA = [
+  {
+    id: "blog1",
+    title: "On Building Things That Feel Alive",
+    year: "2024",
+    // ─── EDIT: BLOG 1 CONTENT ──────────────────────────────────────
+    content: `This is a placeholder for your first blog post.\n\nReplace this text with your actual content.\n\nYou can use line breaks by leaving a blank line between paragraphs.`,
+  },
+  {
+    id: "blog2",
+    title: "Why I Stopped Using Frameworks for Fun Projects",
+    year: "2023",
+    // ─── EDIT: BLOG 2 CONTENT ──────────────────────────────────────
+    content: `This is a placeholder for your second blog post.\n\nReplace this text with your actual content.`,
+  },
+  {
+    id: "blog3",
+    title: "Notes on Creative Consistency",
+    year: "2023",
+    // ─── EDIT: BLOG 3 CONTENT ──────────────────────────────────────
+    content: `This is a placeholder for your third blog post.\n\nReplace this text with your actual content.`,
+  },
 ];
 const MUSIC_MENU = [
   { id: "coverFlow", label: "Cover Flow", hasArrow: false },
-  { id: "artists",   label: "Artists",   hasArrow: true  },
-  { id: "albums",    label: "Albums",    hasArrow: true  },
-  { id: "songs",     label: "Songs",     hasArrow: true  },
-  { id: "playlists", label: "Playlists", hasArrow: true  },
+  { id: "songs",     label: "Songs",      hasArrow: true  },
 ];
 const GAMES_MENU = [
-  { id: "snake", label: "Snake",        hasArrow: false },
-  { id: "ball",  label: "Ball & Plate", hasArrow: false },
+  { id: "snake", label: "Snake", hasArrow: false },
 ];
 const EXTRAS_MENU = [];
 
@@ -136,6 +166,22 @@ const PLAY_ICON = (
   </svg>
 );
 
+const NOTES_ICON = (
+  <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+    <rect x="8" y="6" width="28" height="32" rx="3" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" fill="none"/>
+    <line x1="14" y1="15" x2="30" y2="15" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="14" y1="22" x2="30" y2="22" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"/>
+    <line x1="14" y1="29" x2="22" y2="29" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+const LINKS_ICON = (
+  <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+    <rect x="14" y="20" width="16" height="14" rx="2" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" fill="none"/>
+    <path d="M17 20v-5a5 5 0 0 1 10 0v5" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+    <circle cx="22" cy="27" r="2" fill="rgba(255,255,255,0.7)"/>
+  </svg>
+);
+
 const CONTEXT_MAP = {
   music:      { icon: MUSIC_ICON,  label: "Music Library"  },
   photos:     { icon: PHOTO_ICON,  label: "Photo Library"  },
@@ -144,6 +190,8 @@ const CONTEXT_MAP = {
   clock:      { icon: CLOCK_ICON,  label: "World Clock"    },
   about:      { icon: ABOUT_ICON,  label: "About"          },
   nowPlaying: { icon: PLAY_ICON,   label: "Now Playing"    },
+  notes:      { icon: NOTES_ICON,  label: "Notes"          },
+  links:      { icon: LINKS_ICON,  label: "Links"          },
 };
 
 function fmt(s) {
@@ -235,7 +283,7 @@ function LockScreen({ onUnlock }) {
   }, []);
 
   return (
-    <div className="lock-screen" onClick={onUnlock}>
+    <div className="lock-screen">
       <canvas ref={canvasRef} className="lock-canvas" width={320} height={220} />
       <div className="lock-content">
         <div className="lock-time">
@@ -246,6 +294,25 @@ function LockScreen({ onUnlock }) {
         </div>
         <div className="lock-hint">click wheel to unlock</div>
       </div>
+    </div>
+  );
+}
+
+// ─── MARQUEE ───────────────────────────────────────────────────────
+function Marquee({ text, className }) {
+  const ref = useRef(null);
+  const [overflow, setOverflow] = useState(false);
+  useEffect(() => {
+    if (ref.current) {
+      setOverflow(ref.current.scrollWidth > ref.current.parentElement.offsetWidth + 2);
+    }
+  }, [text]);
+  if (!overflow) {
+    return <span ref={ref} className={className} style={{ whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis", display:"block" }}>{text}</span>;
+  }
+  return (
+    <div className="marquee-wrap">
+      <span className="marquee-text">{text}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{text}</span>
     </div>
   );
 }
@@ -336,8 +403,17 @@ function ListScreen({ title, items, selectedIndex, onBack, isRoot, isPlaying, no
         <div className="list-scroll" ref={listRef}>
           {items.map((item, i) => (
             <div key={item.id || i} className={`list-row${i === selectedIndex ? " selected" : ""}`}>
-              <span className="list-row-label">{item.label}</span>
+              {i === selectedIndex
+                ? <Marquee text={item.label} className="list-row-label" />
+                : <span className="list-row-label">{item.label}</span>
+              }
               {item.hasArrow && <span className="row-arrow">›</span>}
+              {item.hasLock && (
+                <svg width="8" height="10" viewBox="0 0 8 10" fill="none" style={{ flexShrink:0, opacity: i === selectedIndex ? 0.7 : 0.35 }}>
+                  <rect x="1" y="4" width="6" height="5.5" rx="1" fill="currentColor"/>
+                  <path d="M2.5 4V3a1.5 1.5 0 0 1 3 0v1" stroke="currentColor" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+                </svg>
+              )}
             </div>
           ))}
         </div>
@@ -366,7 +442,7 @@ function NowPlayingScreen({ track, isPlaying, progress, onBack, trackIndex, tota
           }
         </div>
         <div className="np-info">
-          <div className="np-title">{track ? track.title : "Not Playing"}</div>
+          {track ? <Marquee text={track.title} className="np-title" /> : <div className="np-title">Not Playing</div>}
           <div className="np-artist">{track ? track.artist : ""}</div>
           <div className="np-album">{track ? track.album : ""}</div>
           {track && <div className="np-counter">{trackIndex + 1} of {totalTracks}</div>}
@@ -432,12 +508,123 @@ function CoverFlowScreen({ selectedIndex, onBack, isPlaying }) {
   );
 }
 
+// ─── NOTES SCREENS ─────────────────────────────────────────────────
+function useNoteScroll(scrollSignal) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!scrollSignal || !ref.current) return;
+    ref.current.scrollTop += scrollSignal * 28;
+  }, [scrollSignal]);
+  return ref;
+}
+function ExperiencesScreen({ onBack, scrollSignal }) {
+  const ref = useNoteScroll(scrollSignal);
+  return (
+    <div className="screen-inner">
+      <Header title="Experiences" onBack={onBack} />
+      <div className="notes-body notes-yellow" ref={ref}>
+        {
+// ─── EDIT: EXPERIENCES NOTE ────────────────────────────────────────
+`Ashlen Singh\nCreative Developer & Generative Artist\n\n─────────────────────\n\n2024 — Present\nFreelance Creative Developer\nBuilding browser-based interactive tools, generative art systems, and portfolio experiences. Clients across design, tech, and music.\n\n2023 — 2024\nFront-End Developer\nWorked on React-based web applications with a focus on animation, canvas tooling, and performance.\n\n2022 — 2023\nUI/UX Designer\nDesigned interfaces for mobile and web products. Strong focus on interaction design and design systems.\n\n─────────────────────\n\nSkills\nReact, Canvas API, WebGL, Three.js, Generative Art, UI Design, Motion Design\n\n─────────────────────\n\nThis section is a placeholder.\nReplace with your actual experience.`
+        }
+      </div>
+    </div>
+  );
+}
+
+function MusicRecommendationsScreen({ onBack, scrollSignal }) {
+  const ref = useNoteScroll(scrollSignal);
+  return (
+    <div className="screen-inner">
+      <Header title="Music Recs" onBack={onBack} />
+      <div className="notes-body notes-yellow" ref={ref}>
+        {
+// ─── EDIT: MUSIC RECOMMENDATIONS NOTE ─────────────────────────────
+`Music Recommendations\n\nSpotify integration coming soon.\n\nThe plan is to embed a curated playlist directly inside this iPod so you can preview what's on rotation.\n\n─────────────────────\n\nGenres I live in:\nSoul, Neo-Soul, Jazz, Ambient Electronic, Lo-fi, Afrobeats, Indie R&B\n\nArtists on heavy rotation:\nSade, Frank Ocean, Khruangbin, Floating Points, Arooj Aftab, James Blake, Little Simz\n\n─────────────────────\n\nPlaylist link coming soon.`
+        }
+      </div>
+    </div>
+  );
+}
+
+function BlogListScreen({ onBack, onSelectBlog }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  return (
+    <div className="screen-inner">
+      <Header title="Blogs" onBack={onBack} />
+      <div className="list-scroll" style={{ flex: 1 }}>
+        {BLOGS_DATA.map((blog, i) => (
+          <div
+            key={blog.id}
+            className={`list-row${i === selectedIndex ? " selected" : ""}`}
+            onClick={() => onSelectBlog(blog)}
+          >
+            <span className="list-row-label">{blog.title}</span>
+            <span style={{ fontSize: "9px", color: i === selectedIndex ? "rgba(255,255,255,0.7)" : "#aaa", marginLeft: "4px", flexShrink: 0 }}>{blog.year}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BlogPostScreen({ onBack, blog, scrollSignal }) {
+  const ref = useNoteScroll(scrollSignal);
+  return (
+    <div className="screen-inner">
+      <Header title={blog.title} onBack={onBack} />
+      <div className="blog-meta">{blog.year}</div>
+      <div className="notes-body notes-yellow" ref={ref}>{blog.content}</div>
+    </div>
+  );
+}
+
+function NotesMenuScreen({ onBack, onSelect }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  return (
+    <div className="screen-inner">
+      <Header title="Notes" onBack={onBack} />
+      <div className="list-wrap">
+        <div className="list-scroll">
+          {NOTES_MENU.map((item, i) => (
+            <div
+              key={item.id}
+              className={`list-row${i === selectedIndex ? " selected" : ""}`}
+              onClick={() => onSelect(item.id)}
+            >
+              <span className="list-row-label">{item.label}</span>
+              {item.hasArrow && <span className="row-arrow">›</span>}
+            </div>
+          ))}
+        </div>
+        <div className="context-panel">
+          <div className="context-icon">{NOTES_ICON}</div>
+          <div className="context-label">Notes</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LinksScreen({ onBack }) {
+  return (
+    <div className="screen-inner">
+      <Header title="Links" onBack={onBack} />
+      <div className="clock-body">
+        <div style={{ fontSize: "32px", marginBottom: "8px" }}>🔒</div>
+        <div style={{ fontSize: "11px", color: "#999", textAlign: "center", padding: "0 16px" }}>Coming soon</div>
+      </div>
+    </div>
+  );
+}
+
 // ─── ABOUT ─────────────────────────────────────────────────────────
-function AboutScreen({ onBack }) {
+function AboutScreen({ onBack, scrollSignal }) {
+  const ref = useNoteScroll(scrollSignal);
   return (
     <div className="screen-inner">
       <Header title="About" onBack={onBack} />
-      <div className="notes-body">
+      <div className="notes-body notes-yellow" ref={ref}>
         {`Hey, I'm Ashlen Singh.\n\nCreative developer building interactive and generative art for the browser.\n\nI work across canvas animation, pixel tools, interactive UI, and weird creative experiments.\n\nThis iPod is a portfolio. Poke around.`}
       </div>
     </div>
@@ -450,6 +637,8 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
   const [viewing, setViewing] = useState(null);
   const [expanding, setExpanding] = useState(false);
   const allRef = useRef([]);
+  const prevSelect = useRef(selectSignal);
+  const prevBack = useRef(backSignal);
 
   const placeholders = [
     "https://picsum.photos/seed/ash1/160/160",
@@ -472,14 +661,16 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
   }, [photoSignal]);
 
   useEffect(() => {
-    if (!selectSignal) return;
+    if (selectSignal === prevSelect.current) return;
+    prevSelect.current = selectSignal;
     if (viewing !== null) return;
     setExpanding(true);
     setTimeout(() => { setViewing(selected); setExpanding(false); }, 180);
   }, [selectSignal]);
 
   useEffect(() => {
-    if (!backSignal) return;
+    if (backSignal === prevBack.current) return;
+    prevBack.current = backSignal;
     if (viewing !== null) { setViewing(null); return; }
     onBack();
   }, [backSignal]);
@@ -518,41 +709,105 @@ function PhotosScreen({ onBack, photos, photoSignal, selectSignal, backSignal })
 }
 
 // ─── CAMERA ────────────────────────────────────────────────────────
-function CameraScreen({ onBack, onCapture }) {
+function playShutter() {
+  const ctx = getAudioCtx(); if (!ctx) return;
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const t = i / ctx.sampleRate;
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 40) * 0.6;
+  }
+  const src = ctx.createBufferSource();
+  const gain = ctx.createGain();
+  src.buffer = buf;
+  src.connect(gain); gain.connect(ctx.destination);
+  gain.gain.setValueAtTime(1, ctx.currentTime);
+  src.start(ctx.currentTime);
+}
+
+function applyVintageFilter(canvas) {
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width; const h = canvas.height;
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i]; let g = data[i+1]; let b = data[i+2];
+    // lift shadows
+    r = r * 0.85 + 28; g = g * 0.85 + 22; b = b * 0.78 + 12;
+    // warm cast — boost red/yellow, pull blue
+    r = Math.min(255, r * 1.12);
+    g = Math.min(255, g * 1.04);
+    b = Math.max(0, b * 0.78);
+    // blow highlights
+    if (r > 200) r = Math.min(255, r + (r - 200) * 0.4);
+    if (g > 190) g = Math.min(255, g + (g - 190) * 0.3);
+    // grain
+    const grain = (Math.random() - 0.5) * 18;
+    data[i]   = Math.max(0, Math.min(255, r + grain));
+    data[i+1] = Math.max(0, Math.min(255, g + grain * 0.8));
+    data[i+2] = Math.max(0, Math.min(255, b + grain * 0.6));
+  }
+  ctx.putImageData(imageData, 0, 0);
+  // vignette
+  const vig = ctx.createRadialGradient(w/2, h/2, h*0.3, w/2, h/2, h*0.85);
+  vig.addColorStop(0, "rgba(0,0,0,0)");
+  vig.addColorStop(1, "rgba(0,0,0,0.38)");
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, w, h);
+}
+
+function CameraScreen({ onBack, onCapture, captureSignal, switchSignal }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const [hasPermission, setHasPermission] = useState(null);
   const [flash, setFlash] = useState(false);
+  const [facingMode, setFacingMode] = useState("environment");
+  const prevCapture = useRef(captureSignal);
+  const prevSwitch = useRef(switchSignal);
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
+    if (captureSignal === prevCapture.current) return;
+    prevCapture.current = captureSignal;
+    capture();
+  }, [captureSignal]);
+
+  useEffect(() => {
+    if (switchSignal === prevSwitch.current) return;
+    prevSwitch.current = switchSignal;
+    switchCamera();
+  }, [switchSignal]);
+
+  const startCamera = (mode) => {
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: mode }, audio: false })
       .then(stream => {
         streamRef.current = stream;
         if (videoRef.current) { videoRef.current.srcObject = stream; setHasPermission(true); }
       })
       .catch(() => setHasPermission(false));
+  };
+
+  useEffect(() => {
+    startCamera(facingMode);
     return () => { if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop()); };
-  }, []);
+  }, [facingMode]);
 
   const capture = () => {
     const canvas = canvasRef.current; const video = videoRef.current;
     if (!canvas || !video || !hasPermission) return;
     const ctx = canvas.getContext("2d");
-    const w = video.videoWidth || 160; const h = video.videoHeight || 120;
+    const w = video.videoWidth || 320; const h = video.videoHeight || 240;
     canvas.width = w; canvas.height = h;
     ctx.drawImage(video, 0, 0, w, h);
-    const imageData = ctx.getImageData(0, 0, w, h);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const grey = data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114;
-      const grain = (Math.random() - 0.5) * 25;
-      const val = Math.max(0, Math.min(255, grey + grain));
-      data[i] = val; data[i+1] = val; data[i+2] = val;
-    }
-    ctx.putImageData(imageData, 0, 0);
-    onCapture(canvas.toDataURL("image/jpeg", 0.85));
-    setFlash(true); playClick(); setTimeout(() => setFlash(false), 150);
+    applyVintageFilter(canvas);
+    onCapture(canvas.toDataURL("image/jpeg", 0.88));
+    playShutter();
+    setFlash(true); setTimeout(() => setFlash(false), 120);
+  };
+
+  const switchCamera = () => {
+    setFacingMode(m => m === "environment" ? "user" : "environment");
   };
 
   return (
@@ -560,18 +815,22 @@ function CameraScreen({ onBack, onCapture }) {
       <Header title="Camera" onBack={onBack} />
       <div className="camera-body">
         {hasPermission === false && <div className="camera-error">Camera access denied</div>}
-        {hasPermission !== false && <video ref={videoRef} autoPlay playsInline muted className="camera-video" />}
+        {hasPermission !== false && (
+          <video
+            ref={videoRef}
+            autoPlay playsInline muted
+            className="camera-video"
+            style={{ filter: "sepia(0.3) saturate(1.3) contrast(1.08) brightness(1.12) hue-rotate(-8deg)" }}
+          />
+        )}
         {flash && <div className="camera-flash" />}
         <canvas ref={canvasRef} style={{ display: "none" }} />
       </div>
-      <div className="camera-controls">
-        <button className="camera-btn" onClick={capture}>● Capture</button>
-      </div>
+      <div className="game-hint">▶II to switch camera · center to capture</div>
     </div>
   );
 }
-
-// ─── CLOCK ─────────────────────────────────────────────────────────
+  // ─── CLOCK ─────────────────────────────────────────────────────────
 function ClockScreen({ onBack }) {
   const [now, setNow] = useState(new Date());
   useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t); }, []);
@@ -783,7 +1042,7 @@ function VolumeOverlay({ volume }) {
 }
 
 // ─── ROOT ──────────────────────────────────────────────────────────
-const LIST_SCREENS = ["mainMenu","musicMenu","gamesMenu","extrasMenu","albums","songs","albumTracks"];
+const LIST_SCREENS = ["mainMenu","musicMenu","gamesMenu","extrasMenu","notesMenu","albums","songs","albumTracks"];
 
 export default function IPod() {
   const [locked, setLocked] = useState(true);
@@ -798,6 +1057,9 @@ export default function IPod() {
   const [photoSignal, setPhotoSignal] = useState(null);
   const [photoSelectSignal, setPhotoSelectSignal] = useState(0);
   const [photoBackSignal, setPhotoBackSignal] = useState(0);
+  const [cameraCaptureSignal, setCameraCaptureSignal] = useState(0);
+  const [cameraSwitchSignal, setCameraSwitchSignal] = useState(0);
+  const [noteScrollSignal, setNoteScrollSignal] = useState(0);
   const [cameraRoll, setCameraRoll] = useState([]);
   const volTimer = useRef(null);
 
@@ -836,6 +1098,7 @@ export default function IPod() {
     if (screen.id==="musicMenu")   return MUSIC_MENU;
     if (screen.id==="gamesMenu")   return GAMES_MENU;
     if (screen.id==="extrasMenu")  return EXTRAS_MENU;
+    if (screen.id==="notesMenu")   return NOTES_MENU;
     if (screen.id==="albums")      return ALBUMS.map(a=>({ id:a.id, label:a.title, hasArrow:true }));
     if (screen.id==="songs")       return ALL_TRACKS.map(t=>({ id:t.id, label:t.title, hasArrow:false }));
     if (screen.id==="albumTracks") {
@@ -848,12 +1111,16 @@ export default function IPod() {
   const unlock = () => { playUnlock(); setLocked(false); };
 
   const handleRotate = (dir) => {
-    if (locked) { unlock(); return; }
+    if (locked) return;
     playTick();
     if (screen.id==="nowPlaying") {
       setVolume(v=>Math.max(0,Math.min(100,v+dir*5)));
       setShowVol(true); clearTimeout(volTimer.current);
       volTimer.current = setTimeout(()=>setShowVol(false),1500); return;
+    }
+    const NOTE_SCREENS = ["experiences","blogPost","musicRecs","about"];
+    if (NOTE_SCREENS.includes(screen.id)) {
+      setNoteScrollSignal(dir); setTimeout(()=>setNoteScrollSignal(0),60); return;
     }
     if (screen.id==="snake"||screen.id==="ball") {
       setRotateSignal(dir); setTimeout(()=>setRotateSignal(0),60); return;
@@ -877,18 +1144,25 @@ export default function IPod() {
   };
 
   const handleSelect = () => {
-    if (locked) { unlock(); return; }
+    if (locked) return;
     playClick();
     if (screen.id === "photos") { setPhotoSelectSignal(s => s + 1); return; }
+    if (screen.id === "camera") { setCameraCaptureSignal(s => s + 1); return; }
     const items = getItems(); const item = items[selectedIndex]; if (!item) return;
     if (screen.id==="mainMenu") {
-      if (item.id==="music")      push({ id:"musicMenu",  title:"Music" });
-      if (item.id==="photos")     push({ id:"photos",     title:"Photos" });
-      if (item.id==="camera")     push({ id:"camera",     title:"Camera" });
-      if (item.id==="games")      push({ id:"gamesMenu",  title:"Games" });
-      if (item.id==="clock")      push({ id:"clock",      title:"Clock" });
-      if (item.id==="about")      push({ id:"notes",      title:"About" });
-      if (item.id==="nowPlaying") push({ id:"nowPlaying", title:"Now Playing" });
+      if (item.id==="music")      push({ id:"musicMenu",   title:"Music" });
+      if (item.id==="photos")     push({ id:"photos",      title:"Photos" });
+      if (item.id==="camera")     push({ id:"camera",      title:"Camera" });
+      if (item.id==="games")      push({ id:"gamesMenu",   title:"Games" });
+      if (item.id==="clock")      push({ id:"clock",       title:"Clock" });
+      if (item.id==="about")      push({ id:"about",       title:"About" });
+      if (item.id==="nowPlaying") push({ id:"nowPlaying",  title:"Now Playing" });
+      if (item.id==="notes")      push({ id:"notesMenu",   title:"Notes" });
+      if (item.id==="links")      push({ id:"links",       title:"Links" });
+    } else if (screen.id==="notesMenu") {
+      if (item.id==="experiences")          push({ id:"experiences",          title:"Experiences" });
+      if (item.id==="blogs")                push({ id:"blogList",             title:"Blogs" });
+      if (item.id==="musicRecommendations") push({ id:"musicRecs",            title:"Music Recs" });
     } else if (screen.id==="musicMenu") {
       if (item.id==="coverFlow") push({ id:"coverFlow", title:"Cover Flow" });
       if (item.id==="albums")    push({ id:"albums",    title:"Albums" });
@@ -911,21 +1185,22 @@ export default function IPod() {
   };
 
   const handlePrev = () => {
-    if (locked) { unlock(); return; } playClick();
+    if (locked) return; playClick();
     if (screen.id==="photos") { setPhotoSignal("prev"); setTimeout(()=>setPhotoSignal(null),60); return; }
     if (!currentTrack) return;
     const idx = ALL_TRACKS.findIndex(t=>t.id===currentTrack.id);
     if (idx>0) { setCurrentTrack(ALL_TRACKS[idx-1]); setProgress(0); }
   };
   const handleNext = () => {
-    if (locked) { unlock(); return; } playClick();
+    if (locked) return; playClick();
     if (screen.id==="photos") { setPhotoSignal("next"); setTimeout(()=>setPhotoSignal(null),60); return; }
     if (!currentTrack) return;
     const idx = ALL_TRACKS.findIndex(t=>t.id===currentTrack.id);
     if (idx<ALL_TRACKS.length-1) { setCurrentTrack(ALL_TRACKS[idx+1]); setProgress(0); }
   };
   const handlePlayPause = () => {
-    if (locked) { unlock(); return; } playClick();
+    if (locked) return; playClick();
+    if (screen.id === "camera") { setCameraSwitchSignal(s => s + 1); return; }
     if (!currentTrack) { playTrack(ALL_TRACKS[0]); return; }
     setIsPlaying(p=>!p);
   };
@@ -956,9 +1231,14 @@ export default function IPod() {
     }
     if (screen.id==="nowPlaying") return <NowPlayingScreen track={currentTrack} isPlaying={isPlaying} progress={progress} onBack={pop} trackIndex={trackIndex} totalTracks={ALL_TRACKS.length} />;
     if (screen.id==="coverFlow")  return <CoverFlowScreen selectedIndex={selectedIndex} onBack={pop} isPlaying={isPlaying} />;
-    if (screen.id==="notes")      return <AboutScreen onBack={pop} />;
+    if (screen.id==="about")        return <AboutScreen onBack={pop} scrollSignal={noteScrollSignal} />;
+    if (screen.id==="experiences")  return <ExperiencesScreen onBack={pop} scrollSignal={noteScrollSignal} />;
+    if (screen.id==="blogList")     return <BlogListScreen onBack={pop} onSelectBlog={blog => push({ id:"blogPost", title:blog.title, blog })} />;
+    if (screen.id==="blogPost")     return <BlogPostScreen onBack={pop} blog={screen.blog} scrollSignal={noteScrollSignal} />;
+    if (screen.id==="musicRecs")    return <MusicRecommendationsScreen onBack={pop} scrollSignal={noteScrollSignal} />;
+    if (screen.id==="links")        return <LinksScreen onBack={pop} />;
     if (screen.id==="photos")     return <PhotosScreen onBack={pop} photos={cameraRoll} photoSignal={photoSignal} selectSignal={photoSelectSignal} backSignal={photoBackSignal} />;
-    if (screen.id==="camera")     return <CameraScreen onBack={pop} onCapture={url=>setCameraRoll(prev=>[url,...prev])} />;
+    if (screen.id==="camera")     return <CameraScreen onBack={pop} onCapture={url=>setCameraRoll(prev=>[url,...prev])} captureSignal={cameraCaptureSignal} switchSignal={cameraSwitchSignal} />;
     if (screen.id==="clock")      return <ClockScreen onBack={pop} />;
     if (screen.id==="snake")      return <SnakeGame onBack={pop} rotateSignal={rotateSignal} />;
     if (screen.id==="ball")       return <BallGame onBack={pop} rotateSignal={rotateSignal} />;
