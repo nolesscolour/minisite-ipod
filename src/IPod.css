@@ -490,8 +490,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-auto-rows: 94px;
-  gap: 2px;
-  padding: 2px;
+  gap: 3px;
+  padding: 3px;
   flex: 1;
   overflow-y: scroll;
   background: #ddd;
