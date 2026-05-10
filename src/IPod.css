@@ -777,10 +777,11 @@
 .ipod-bottom-pad { height: 14px; }
 
 @media (max-width: 480px) {
-  .ipod-outer { padding: 16px 12px; }
-  .ipod-body  { width: 290px; }
-  .wheel      { width: 218px; height: 218px; }
-  .wheel-center-btn { width: 64px; height: 64px; }
+  .ipod-outer { padding: 12px 10px; }
+  .ipod-body  { width: 340px; }
+  .wheel      { width: 256px; height: 256px; }
+  .wheel-center-btn { width: 76px; height: 76px; }
+  .screen { height: 240px; }
 }
 .photo-thumb-selected {
   outline: 2.5px solid #2d58b0;
