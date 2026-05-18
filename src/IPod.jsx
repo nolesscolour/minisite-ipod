@@ -1,66 +1,26 @@
 import { useState, useRef, useEffect } from "react";
 import "./IPod.css";
 
-const ALBUMS = [
+// ─── SONGS ────────────────────────────────────────────────────────
+// Add new songs to this array. Each needs: id, title, artist, src (mp3 path), art (jpg path).
+const ALL_TRACKS = [
   {
-    id: 1, artist: "Frank Ocean", title: "Blonde", year: 2016,
-    art: "https://coverartarchive.org/release/b27560ea-f2b2-4c03-a8d1-24d4f8b0d3b1/front-250",
-    tracks: [
-      { id: 1,  title: "Nikes",        duration: 199 },
-      { id: 2,  title: "Ivy",          duration: 252 },
-      { id: 3,  title: "Pink + White", duration: 214 },
-      { id: 4,  title: "Be Yourself",  duration: 111 },
-      { id: 5,  title: "Solo",         duration: 258 },
-    ],
+    id: 1,
+    title: "All The Love",
+    artist: "Kanye West feat. André Troutman",
+    src: "/audio/all-the-love.mp3",
+    art: "/art/all-the-love.jpg",
   },
   {
-    id: 2, artist: "Sade", title: "The Best of Sade", year: 1994,
-    art: "https://i.scdn.co/image/ab67616d0000b273a3dc8301e273a4e35a0a0609",
-    tracks: [
-      { id: 6,  title: "No Ordinary Love",  duration: 404 },
-      { id: 7,  title: "Is It a Crime",     duration: 390 },
-      { id: 8,  title: "Smooth Operator",   duration: 282 },
-      { id: 9,  title: "Your Love Is King", duration: 225 },
-    ],
-  },
-  {
-    id: 3, artist: "Gorillaz", title: "Demon Days", year: 2005,
-    art: "https://coverartarchive.org/release/c5814e2a-02f3-4248-b056-a96f4fc0e5e6/front-250",
-    tracks: [
-      { id: 10, title: "Feel Good Inc.", duration: 221 },
-      { id: 11, title: "DARE",           duration: 237 },
-      { id: 12, title: "Dirty Harry",    duration: 300 },
-      { id: 13, title: "El Mañana",      duration: 224 },
-    ],
-  },
-  {
-    id: 4, artist: "Daft Punk", title: "Discovery", year: 2001,
-    art: "https://upload.wikimedia.org/wikipedia/en/2/27/Daft_Punk_-_Discovery.png",
-    tracks: [
-      { id: 14, title: "One More Time",                 duration: 320 },
-      { id: 15, title: "Digital Love",                  duration: 301 },
-      { id: 16, title: "Harder Better Faster Stronger", duration: 226 },
-      { id: 17, title: "Voyager",                       duration: 228 },
-    ],
-  },
-  {
-    id: 5, artist: "Amy Winehouse", title: "Back to Black", year: 2006,
-    art: "https://coverartarchive.org/release/2d9f7e19-1cd1-4224-9b4a-2d3fffb8ae54/front-250",
-    tracks: [
-      { id: 18, title: "Rehab",                  duration: 213 },
-      { id: 19, title: "You Know I'm No Good",   duration: 255 },
-      { id: 20, title: "Back to Black",          duration: 242 },
-      { id: 21, title: "Tears Dry on Their Own", duration: 186 },
-    ],
+    id: 2,
+    title: "Lights Burn Dimmer",
+    artist: "Fred Again",
+    src: "/audio/lights-burn-dimmer.mp3",
+    art: "/art/lights-burn-dimmer.jpg",
   },
 ];
 
-const ALL_TRACKS = ALBUMS.flatMap((album) =>
-  album.tracks.map((t) => ({
-    id: t.id, title: t.title, duration: t.duration,
-    artist: album.artist, album: album.title, art: album.art,
-  }))
-);
+const ALBUMS = []; // Kept empty — Cover Flow disabled until album support is added back
 
 const MAIN_MENU = [
   { id: "nowPlaying", label: "Now Playing", hasArrow: false },
@@ -404,7 +364,7 @@ function ListScreen({ title, items, selectedIndex, onBack, isRoot, isPlaying, no
           {items.map((item, i) => (
             <div key={item.id || i} className={`list-row${i === selectedIndex ? " selected" : ""}`}>
               {i === selectedIndex
-                ? <Marquee text={item.label} className="list-row-label" />
+                ? <div style={{ flex: 1, overflow: "hidden", minWidth: 0 }}><Marquee text={item.label} className="list-row-label-marquee" /></div>
                 : <span className="list-row-label">{item.label}</span>
               }
               {item.hasArrow && <span className="row-arrow">›</span>}
@@ -429,8 +389,8 @@ function ListScreen({ title, items, selectedIndex, onBack, isRoot, isPlaying, no
 }
 
 // ─── NOW PLAYING ───────────────────────────────────────────────────
-function NowPlayingScreen({ track, isPlaying, progress, onBack, trackIndex, totalTracks }) {
-  const pct = track ? Math.min(100, (progress / track.duration) * 100) : 0;
+function NowPlayingScreen({ track, isPlaying, progress, duration, onBack, trackIndex, totalTracks }) {
+  const pct = track && duration ? Math.min(100, (progress / duration) * 100) : 0;
   return (
     <div className="screen-inner">
       <Header title="Now Playing" onBack={onBack} isPlaying={isPlaying} />
@@ -451,7 +411,7 @@ function NowPlayingScreen({ track, isPlaying, progress, onBack, trackIndex, tota
       <div className="np-progress">
         <span className="np-time">{fmt(progress)}</span>
         <div className="np-bar-bg"><div className="np-bar-fill" style={{ width: `${pct}%` }} /></div>
-        <span className="np-time np-time-right">-{fmt(track ? track.duration - progress : 0)}</span>
+        <span className="np-time np-time-right">-{fmt(duration ? Math.max(0, Math.floor(duration - progress)) : 0)}</span>
       </div>
     </div>
   );
@@ -470,7 +430,7 @@ function CoverFlowScreen({ selectedIndex, onBack, isPlaying }) {
         </div>
       </div>
       <div className="cf-stage">
-        {ALBUMS.map((album, i) => {
+        {ALL_TRACKS.map((track, i) => {
           const offset = i - selectedIndex;
           const abs = Math.abs(offset);
           if (abs > 2) return null;
@@ -481,7 +441,7 @@ function CoverFlowScreen({ selectedIndex, onBack, isPlaying }) {
           const op = 1 - abs * 0.15;
           const scale = isCenter ? 1 : 0.72;
           return (
-            <div key={album.id}
+            <div key={track.id}
               className={`cf-card${isCenter ? " cf-card-active" : ""}`}
               style={{
                 transform: `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
@@ -489,8 +449,8 @@ function CoverFlowScreen({ selectedIndex, onBack, isPlaying }) {
                 zIndex: 10 - abs,
               }}>
               <div className="cf-art-wrap">
-                {album.art
-                  ? <img src={album.art} alt="" onError={e => { e.target.style.display="none"; e.target.nextSibling.style.display="flex"; }} />
+                {track.art
+                  ? <img src={track.art} alt="" onError={e => { e.target.style.display="none"; e.target.nextSibling.style.display="flex"; }} />
                   : null
                 }
                 <div className="cf-art-fallback">♪</div>
@@ -501,8 +461,8 @@ function CoverFlowScreen({ selectedIndex, onBack, isPlaying }) {
         })}
       </div>
       <div className="cf-label">
-        <div className="cf-label-title">{ALBUMS[selectedIndex] ? ALBUMS[selectedIndex].title : ""}</div>
-        <div className="cf-label-artist">{ALBUMS[selectedIndex] ? ALBUMS[selectedIndex].artist : ""}</div>
+        <div className="cf-label-title">{ALL_TRACKS[selectedIndex] ? ALL_TRACKS[selectedIndex].title : ""}</div>
+        <div className="cf-label-artist">{ALL_TRACKS[selectedIndex] ? ALL_TRACKS[selectedIndex].artist : ""}</div>
       </div>
     </div>
   );
@@ -1081,7 +1041,9 @@ export default function IPod() {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(70);
+  const audioRef = useRef(null);
   const [showVol, setShowVol] = useState(false);
   const [rotateSignal, setRotateSignal] = useState(0);
   const [photoSignal, setPhotoSignal] = useState(null);
@@ -1113,12 +1075,14 @@ export default function IPod() {
   }, []);
 
   useEffect(() => {
-    if (!isPlaying||!currentTrack) return;
-    const t = setInterval(() => {
-      setProgress(p => { if (p>=currentTrack.duration) { setIsPlaying(false); return 0; } return p+1; });
-    }, 1000);
-    return () => clearInterval(t);
+    if (!audioRef.current) return;
+    if (isPlaying) audioRef.current.play().catch(() => setIsPlaying(false));
+    else audioRef.current.pause();
   }, [isPlaying, currentTrack]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume / 100;
+  }, [volume]);
 
   const push = (s) => { setNavStack(prev=>[...prev,s]); setSelectedIndex(0); };
   const pop  = () => { if (navStack.length>1) { playClick(); setNavStack(prev=>prev.slice(0,-1)); setSelectedIndex(0); } };
@@ -1160,7 +1124,7 @@ export default function IPod() {
       setTimeout(()=>setPhotoSignal(null), 60); return;
     }
     if (screen.id==="coverFlow") {
-      setSelectedIndex(i=>Math.max(0,Math.min(ALBUMS.length-1,i+dir))); return;
+      setSelectedIndex(i=>Math.max(0,Math.min(ALL_TRACKS.length-1,i+dir))); return;
     }
     if (LIST_SCREENS.includes(screen.id)) {
       const items = getItems();
@@ -1210,7 +1174,7 @@ export default function IPod() {
       const alb = ALBUMS.find(a=>a.id===screen.albumId);
       if (alb) { const t=alb.tracks[selectedIndex]; playTrack({ id:t.id, title:t.title, duration:t.duration, artist:alb.artist, album:alb.title, art:alb.art }); }
     } else if (screen.id==="coverFlow") {
-      push({ id:"albumTracks", title:ALBUMS[selectedIndex].title, albumId:ALBUMS[selectedIndex].id });
+      playTrack(ALL_TRACKS[selectedIndex]);
     }
   };
 
@@ -1259,7 +1223,7 @@ export default function IPod() {
         />
       );
     }
-    if (screen.id==="nowPlaying") return <NowPlayingScreen track={currentTrack} isPlaying={isPlaying} progress={progress} onBack={pop} trackIndex={trackIndex} totalTracks={ALL_TRACKS.length} />;
+    if (screen.id==="nowPlaying") return <NowPlayingScreen track={currentTrack} isPlaying={isPlaying} progress={progress} duration={duration} onBack={pop} trackIndex={trackIndex} totalTracks={ALL_TRACKS.length} />;
     if (screen.id==="coverFlow")  return <CoverFlowScreen selectedIndex={selectedIndex} onBack={pop} isPlaying={isPlaying} />;
     if (screen.id==="about")        return <AboutScreen onBack={pop} scrollSignal={noteScrollSignal} />;
     if (screen.id==="experiences")  return <ExperiencesScreen onBack={pop} scrollSignal={noteScrollSignal} />;
@@ -1277,6 +1241,17 @@ export default function IPod() {
 
   return (
     <div className="ipod-outer">
+      <audio
+        ref={audioRef}
+        src={currentTrack ? currentTrack.src : undefined}
+        onLoadedMetadata={e => setDuration(e.target.duration || 0)}
+        onTimeUpdate={e => setProgress(Math.floor(e.target.currentTime))}
+        onEnded={() => {
+          const idx = ALL_TRACKS.findIndex(t => t.id === currentTrack.id);
+          if (idx < ALL_TRACKS.length - 1) { setCurrentTrack(ALL_TRACKS[idx + 1]); setProgress(0); }
+          else { setIsPlaying(false); setProgress(0); }
+        }}
+      />
       <div className="ipod-body">
         <div className="screen-bezel">
           <div className="screen">

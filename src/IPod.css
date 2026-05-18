@@ -855,3 +855,7 @@
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+.list-row-label-marquee {
+  white-space: nowrap;
+  display: inline-block;
+}
